@@ -133,19 +133,19 @@ public class CS1181Project2Foster extends Application {
         // player options
         Button attackButton = new Button("Melee Attack");
         attackButton.setMinSize(50, 50);
-        Image attackImage = new Image("file:attack.png", 50, 50, true, false);
+        Image attackImage = new Image("/assets/attack.png", 50, 50, true, false);
         ImageView attackPic = new ImageView(attackImage);
         attackButton.setGraphic(attackPic);
 
         Button castSpell = new Button("Magic Spell");
         castSpell.setMinSize(50, 50);
-        Image spellImage = new Image("file:spell.png", 50, 50, true, false);
+        Image spellImage = new Image("/assets/spell.png", 50, 50, true, false);
         ImageView spellPic = new ImageView(spellImage);
         castSpell.setGraphic(spellPic);
 
         Button potion = new Button("Potion");
         potion.setMinSize(50, 50);
-        Image potionPicImage = new Image("file:potion.png", 50, 50, true, false);
+        Image potionPicImage = new Image("/assets/potion.png", 50, 50, true, false);
         ImageView potionPic = new ImageView(potionPicImage);
         potion.setGraphic(potionPic);
         VBox charOptions = new VBox(10);
@@ -164,357 +164,24 @@ public class CS1181Project2Foster extends Application {
         });
         // logic for the first enemy button
         enemy1.setOnAction(e2 -> {
-            enemy1Click = true;
-            enemy2Click = false;
-            enemy3Click = false;
-            if (!attacking && !casting) {
-                return; // MC
-            }
-            // attack phase, attacked enemy returns its own attack
-            // for melee attack
-            if (attacking && enemy1Click) {
-                int attack = player.getDmg();
-                int enemyAttack = opponent1.getDmg();
-                if (attack != 0 && enemyAttack != 0) {
-                    opponent1.setHealth(opponent1.getHealth() - attack);
-                    player.setHealth(player.getHealth() - enemyAttack);
-                    enemy1Info.setText(opponent1.toString());
-                    playerInfo.setText(player.toString());
-                    updates.setText("Hit!" + "\n" + "Enemy hit you!");
-                } else if (attack == 0 && enemyAttack != 0) {
-                    updates.setText("Attack missed!" + "\n" + "Enemy hit you!");
-                    player.setHealth(player.getHealth() - enemyAttack);
-                    enemy1Info.setText(opponent1.toString());
-                    playerInfo.setText(player.toString());
-                } else if (attack != 0 && enemyAttack == 0) {
-                    opponent1.setHealth(opponent1.getHealth() - attack);
-                    enemy1Info.setText(opponent1.toString());
-                    updates.setText("Hit!" + "\n" + "Enemy missed!");
-                }
-                if (attack == 0 && enemyAttack == 0) {
-                    updates.setText("You both missed!");
-                }
-                attacking = false;
-                enemy1Click = false;
-            }
-            // for magic attack
-            if (casting && enemy1Click) {
-                int enemyAttack = opponent1.getDmg();
-                if (player.getMana() < 5) {
-                    updates.setText("No mana left, attack with melee!");
-                    casting = false;
-                }
-                if (player.getMana() >= 5) {
-                    int spell = player.getMagicDmg();
-                    player.setMana(player.getMana() - player.getManaCost());
-                    if (spell != 0 && enemyAttack != 0) {
-                        opponent1.setHealth(opponent1.getHealth() - spell);
-                        player.setHealth(player.getHealth() - enemyAttack);
-                        enemy1Info.setText(opponent1.toString());
-                        playerInfo.setText(player.toString());
-                        updates.setText("Spell hit!" + "\n" + "Enemy hit you!");
-                    } else if (spell == 0 && enemyAttack != 0) {
-                        player.setHealth(player.getHealth() - enemyAttack);
-                        playerInfo.setText(player.toString());
-                        updates.setText("Spell missed!" + "\n" + "Enemy hit you!");
-                    } else if (spell != 0 && enemyAttack == 0) {
-                        opponent1.setHealth(opponent1.getHealth() - spell);
-                        enemy1Info.setText(opponent1.toString());
-                        playerInfo.setText(player.toString());
-                        updates.setText("Spell hit!" + "\n" + "Enemy missed!");
-                    }
-                    if (spell == 0 && enemyAttack == 0) {
-                        playerInfo.setText(player.toString());
-                        updates.setText("You both missed!");
-                    }
-                    casting = false;
-                    enemy1Click = false;
-                }
-            }
-            // enemy death
-            if (opponent1.getHealth() <= 0) {
-                enemy1.setDisable(true);
-                if (player.getMana() < 9) {
-                    player.setMana(player.getMana() + 2);
-                } else {
-                    player.setMana(10);
-                }
-                player.setExp(player.getExp() + opponent3.getExpWorth());
-                if (player.getExp() >= player.getExpRequired()) {
-                    player.levelUp();
-                }
-                player.setGold((player.getGold() + opponent1.getGoldValue()));
-                playerInfo.setText(player.toString());
-                updates.setText(opponent1.getName() + " is dead!");
-                opponent1.setHealth(0);
-                enemy1Info.setText(opponent1.toString());
-                if (opponent1.getHealth() == 0 && opponent2.getHealth() == 0 && opponent3.getHealth() == 0) {
-                    updates.setText(opponent1.getName() + " is dead!" + "\n" + "Round Cleared");
-                    Optional<ButtonType> result = alert.showAndWait();
-                    if (result.get() == continueButton) {
-                        enemy1.setDisable(false);
-                        enemy2.setDisable(false);
-                        enemy3.setDisable(false);
-                        opponent1.createOpponent(enemyList);
-                        opponent2.createOpponent(enemyList);
-                        opponent3.createOpponent(enemyList);
-                        enemy1.setGraphic(new ImageView(opponent1.getImage()));
-                        enemy2.setGraphic(new ImageView(opponent2.getImage()));
-                        enemy3.setGraphic(new ImageView(opponent3.getImage()));
-                        enemy1Info.setText(opponent1.toString());
-                        enemy2Info.setText(opponent2.toString());
-                        enemy3Info.setText(opponent3.toString());
-                    } else {
-                        fleeing.setContentText("You escape with your loot!" + "\n" + "You collected " + player.getGold() + " gold!");
-                        fleeing.showAndWait();
-                        System.exit(0);
-                    }
-                }
-            }
-            // checks for player death
-            if (player.getHealth() <= 0) {
-                playerInfo.setText(player.toString());
-                playerDeath.showAndWait();
-                System.exit(0);
-            }
+            enemyButtonAction(player, opponent1, enemy1Info, playerInfo, updates, enemy1);
+            deathChecks(player, opponent1, opponent2, opponent3, enemy1, enemy2, 
+                    enemy3, updates, enemyList, enemy1Info, enemy2Info, enemy3Info, 
+                    alert, continueButton, fleeing, playerInfo, playerDeath);
         });
         // logic for the second enemy button
         enemy2.setOnAction(e3 -> {
-            enemy1Click = false;
-            enemy2Click = true;
-            enemy3Click = false;
-            if (!attacking && !casting) {
-                return; // MC
-            }
-            if (attacking && enemy2Click) {
-                // attack phase, attacked enemy returns its own attack
-                // for melee attack
-                int attack = player.getDmg();
-                int enemyAttack = opponent2.getDmg();
-                if (attack != 0 && enemyAttack != 0) {
-                    opponent2.setHealth(opponent2.getHealth() - attack);
-                    player.setHealth(player.getHealth() - enemyAttack);
-                    enemy2Info.setText(opponent2.toString());
-                    playerInfo.setText(player.toString());
-                    updates.setText("Hit!" + "\n" + "Enemy hit you!");
-                } else if (attack == 0 && enemyAttack != 0) {
-                    updates.setText("Attack missed!" + "\n" + "Enemy hit you!");
-                    player.setHealth(player.getHealth() - enemyAttack);
-                    enemy2Info.setText(opponent2.toString());
-                    playerInfo.setText(player.toString());
-                } else if (attack != 0 && enemyAttack == 0) {
-                    opponent2.setHealth(opponent2.getHealth() - attack);
-                    enemy2Info.setText(opponent2.toString());
-                    updates.setText("Hit!" + "\n" + "Enemy missed!");
-                }
-                if (attack == 0 && enemyAttack == 0) {
-                    updates.setText("You both missed!");
-                }
-                if (attack == 0 && enemyAttack == 0) {
-                    updates.setText("You both missed!");
-                }
-                attacking = false;
-                enemy2Click = false;
-            }
-            // for magic attack
-            if (casting && enemy2Click) {
-                int enemyAttack = opponent2.getDmg();
-                if (player.getMana() < 5) {
-                    updates.setText("No mana left, attack with melee!");
-                    casting = false;
-                }
-                if (player.getMana() >= 5) {
-                    int spell = player.getMagicDmg();
-                    player.setMana(player.getMana() - player.getManaCost());
-                    if (spell != 0 && enemyAttack != 0) {
-                        opponent2.setHealth(opponent2.getHealth() - spell);
-                        player.setHealth(player.getHealth() - enemyAttack);
-                        enemy2Info.setText(opponent2.toString());
-                        playerInfo.setText(player.toString());
-                        updates.setText("Spell hit!" + "\n" + "Enemy hit you!");
-                    } else if (spell == 0 && enemyAttack != 0) {
-                        player.setHealth(player.getHealth() - enemyAttack);
-                        playerInfo.setText(player.toString());
-                        updates.setText("Spell missed!" + "\n" + "Enemy hit you!");
-                    } else if (spell != 0 && enemyAttack == 0) {
-                        opponent2.setHealth(opponent2.getHealth() - spell);
-                        enemy2Info.setText(opponent1.toString());
-                        playerInfo.setText(player.toString());
-                        updates.setText("Spell hit!" + "\n" + "Enemy missed!");
-                    }
-                    if (spell == 0 && enemyAttack == 0) {
-                        playerInfo.setText(player.toString());
-                        updates.setText("You both missed!");
-                    }
-                    casting = false;
-                    enemy2Click = false;
-                }
-            }
-            // enemy death
-            if (opponent2.getHealth() <= 0) {
-                enemy2.setDisable(true);
-                if (player.getMana() < 9) {
-                    player.setMana(player.getMana() + 2);
-                } else {
-                    player.setMana(10);
-                }
-                player.setExp(player.getExp() + opponent3.getExpWorth());
-                if (player.getExp() >= player.getExpRequired()) {
-                    player.levelUp();
-                }
-                updates.setText(opponent2.getName() + " is dead!");
-                player.setGold(player.getGold() + opponent2.getGoldValue());
-                playerInfo.setText(player.toString());
-                opponent2.setHealth(0);
-                enemy2Info.setText(opponent2.toString());
-                if (opponent1.getHealth() == 0 && opponent2.getHealth() == 0 && opponent3.getHealth() == 0) {
-                    updates.setText(opponent2.getName() + " is dead!" + "\n" + "Round Cleared");
-                    Optional<ButtonType> result = alert.showAndWait();
-                    if (result.get() == continueButton) {
-                        enemy1.setDisable(false);
-                        enemy2.setDisable(false);
-                        enemy3.setDisable(false);
-                        opponent1.createOpponent(enemyList);
-                        opponent2.createOpponent(enemyList);
-                        opponent3.createOpponent(enemyList);
-                        enemy1.setGraphic(new ImageView(opponent1.getImage()));
-                        enemy2.setGraphic(new ImageView(opponent2.getImage()));
-                        enemy3.setGraphic(new ImageView(opponent3.getImage()));
-                        enemy1Info.setText(opponent1.toString());
-                        enemy2Info.setText(opponent2.toString());
-                        enemy3Info.setText(opponent3.toString());
-                    } else {
-                        fleeing.setContentText("You escape with your loot!" + "\n" + "You collected " + player.getGold() + " gold!");
-                        fleeing.showAndWait();
-                        System.exit(0);
-                    }
-                }
-            }
-            // checks for player death
-            if (player.getHealth() <= 0) {
-                playerInfo.setText(player.toString());
-                playerDeath.showAndWait();
-                System.exit(0);
-            }
+            enemyButtonAction(player, opponent2, enemy2Info, playerInfo, updates, enemy2);
+            deathChecks(player, opponent1, opponent2, opponent3, enemy1, enemy2, 
+                    enemy3, updates, enemyList, enemy1Info, enemy2Info, enemy3Info, 
+                    alert, continueButton, fleeing, playerInfo, playerDeath);
         });
         // logic for the third enemy button
         enemy3.setOnAction(e4 -> {
-            enemy1Click = false;
-            enemy2Click = false;
-            enemy3Click = true;
-            if (!attacking && !casting) {
-                return; // MC
-            }
-            // attack phase, attacked enemy returns its own attack
-            // for melee attack
-            if (attacking && enemy3Click) {
-                int attack = player.getDmg();
-                int enemyAttack = opponent3.getDmg();
-                if (attack != 0 && enemyAttack != 0) {
-                    opponent3.setHealth(opponent3.getHealth() - attack);
-                    player.setHealth(player.getHealth() - enemyAttack);
-                    enemy3Info.setText(opponent3.toString());
-                    playerInfo.setText(player.toString());
-                    updates.setText("Hit!" + "\n" + "Enemy hit you!");
-                } else if (attack == 0 && enemyAttack != 0) {
-                    updates.setText("Attack missed!" + "\n" + "Enemy hit you!");
-                    player.setHealth(player.getHealth() - enemyAttack);
-                    enemy1Info.setText(opponent1.toString());
-                    playerInfo.setText(player.toString());
-                } else if (attack != 0 && enemyAttack == 0) {
-                    opponent3.setHealth(opponent3.getHealth() - attack);
-                    enemy3Info.setText(opponent3.toString());
-                    updates.setText("Hit!" + "\n" + "Enemy missed!");
-                }
-                if (attack == 0 && enemyAttack == 0) {
-                    updates.setText("You both missed!");
-                }
-                if (attack == 0 && enemyAttack == 0) {
-                    updates.setText("You both missed!");
-                }
-                attacking = false;
-                enemy3Click = false;
-            }
-            // for magic attack
-            if (casting && enemy3Click) {
-                int enemyAttack = opponent3.getDmg();
-                if (player.getMana() < 5) {
-                    updates.setText("No mana left, attack with melee!");
-                    casting = false;
-                }
-                if (player.getMana() >= 5) {
-                    int spell = player.getMagicDmg();
-                    player.setMana(player.getMana() - player.getManaCost());
-                    if (spell != 0 && enemyAttack != 0) {
-                        opponent3.setHealth(opponent3.getHealth() - spell);
-                        player.setHealth(player.getHealth() - enemyAttack);
-                        enemy3Info.setText(opponent3.toString());
-                        playerInfo.setText(player.toString());
-                        updates.setText("Spell hit!" + "\n" + "Enemy hit you!");
-                    } else if (spell == 0 && enemyAttack != 0) {
-                        player.setHealth(player.getHealth() - enemyAttack);
-                        playerInfo.setText(player.toString());
-                        updates.setText("Spell missed!" + "\n" + "Enemy hit you!");
-                    } else if (spell != 0 && enemyAttack == 0) {
-                        opponent3.setHealth(opponent3.getHealth() - spell);
-                        enemy3Info.setText(opponent3.toString());
-                        playerInfo.setText(player.toString());
-                        updates.setText("Spell hit!" + "\n" + "Enemy missed!");
-                    }
-                    if (spell == 0 && enemyAttack == 0) {
-                        playerInfo.setText(player.toString());
-                        updates.setText("You both missed!");
-                    }
-                    casting = false;
-                    enemy3Click = false;
-                }
-            }
-            // enemy death
-            if (opponent3.getHealth() <= 0) {
-                enemy3.setDisable(true);
-                if (player.getMana() < 9) {
-                    player.setMana(player.getMana() + 2);
-                } else {
-                    player.setMana(10);
-                }
-                player.setExp(player.getExp() + opponent3.getExpWorth());
-                if (player.getExp() >= player.getExpRequired()) {
-                    player.levelUp();
-                }
-                playerInfo.setText(player.toString());
-                updates.setText(opponent3.getName() + " is dead!");
-                player.setGold(player.getGold() + opponent3.getGoldValue());
-                opponent3.setHealth(0);
-                enemy3Info.setText(opponent3.toString());
-                if (opponent1.getHealth() == 0 && opponent2.getHealth() == 0 && opponent3.getHealth() == 0) {
-                    updates.setText(opponent3.getName() + " is dead!" + "\n" + "Round Cleared");
-                    Optional<ButtonType> result = alert.showAndWait();
-                    if (result.get() == continueButton) {
-                        enemy1.setDisable(false);
-                        enemy2.setDisable(false);
-                        enemy3.setDisable(false);
-                        opponent1.createOpponent(enemyList);
-                        opponent2.createOpponent(enemyList);
-                        opponent3.createOpponent(enemyList);
-                        enemy1.setGraphic(new ImageView(opponent1.getImage()));
-                        enemy2.setGraphic(new ImageView(opponent2.getImage()));
-                        enemy3.setGraphic(new ImageView(opponent3.getImage()));
-                        enemy1Info.setText(opponent1.toString());
-                        enemy2Info.setText(opponent2.toString());
-                        enemy3Info.setText(opponent3.toString());
-                    } else {
-                        fleeing.setContentText("You escape with your loot!" + "\n" + "You collected " + player.getGold() + " gold!");
-                        fleeing.showAndWait();
-                        System.exit(0);
-                    }
-                }
-            }
-            // checks for player death
-            if (player.getHealth() <= 0) {
-                playerInfo.setText(player.toString());
-                playerDeath.showAndWait();
-                System.exit(0);
-            }
+            enemyButtonAction(player, opponent3, enemy3Info, playerInfo, updates, enemy3);
+            deathChecks(player, opponent1, opponent2, opponent3, enemy1, enemy2, 
+                    enemy3, updates, enemyList, enemy1Info, enemy2Info, enemy3Info, 
+                    alert, continueButton, fleeing, playerInfo, playerDeath);
         });
         // heals with potion
         potion.setOnAction(e -> {
@@ -551,7 +218,8 @@ public class CS1181Project2Foster extends Application {
         root.getChildren().add(enemyInfo);
         root.getChildren().add(charDisplay);
 
-        Image caveImage = new Image("file:cave.png", 1245, 750, true, false);
+        Image caveImage = new Image(getClass().getResourceAsStream("/assets/cave.png"), 1245, 750, true, false); // this allows the image to be included in the Build
+        // the assets folder needs to be in the src folder
         ImageView background = new ImageView(caveImage);
         StackPane backgroundPane = new StackPane();
 
@@ -579,14 +247,14 @@ public class CS1181Project2Foster extends Application {
      *
      * @return ArrayList of enemies
      */
-    public static ArrayList<Enemy> createEnemies() {
+    public ArrayList<Enemy> createEnemies() {
         ArrayList<Enemy> enemyList = new ArrayList<>();
 
-        Image orcPic = new Image("file:orc.png", 400, 500, true, false);
-        Image ogrePic = new Image("file:ogre.png", 400, 500, true, false);
-        Image warlockPic = new Image("file:warlock.png", 400, 500, true, false);
-        Image skeletonPic = new Image("file:skeleton.png", 400, 500, true, false);
-        Image zombiePic = new Image("file:zombie.png", 400, 500, true, false);
+        Image orcPic = new Image(getClass().getResourceAsStream("/assets/orc.png"), 400, 500, true, false);
+        Image ogrePic = new Image("/assets/ogre.png", 400, 500, true, false);
+        Image warlockPic = new Image("/assets/warlock.png", 400, 500, true, false);
+        Image skeletonPic = new Image("/assets/skeleton.png", 400, 500, true, false);
+        Image zombiePic = new Image("/assets/zombie.png", 400, 500, true, false);
 
         Enemy orc = new Enemy("Orc", 10, 4, 5, orcPic, 5);
         enemyList.add(orc);
@@ -600,5 +268,128 @@ public class CS1181Project2Foster extends Application {
         enemyList.add(zombie);
 
         return enemyList;
+    }
+
+    public void enemyButtonAction(Player player, Enemy opponent, TextArea enemyInfo,
+            TextArea playerInfo, TextArea updates, Button enemy) {
+        enemy1Click = true;
+        enemy2Click = false;
+        enemy3Click = false;
+        if (!attacking && !casting) {
+            return; // MC
+        }
+        // attack phase, attacked enemy returns its own attack
+        // for melee attack
+        if (attacking && enemy1Click) {
+            int attack = player.getDmg();
+            int enemyAttack = opponent.getDmg();
+            if (attack != 0 && enemyAttack != 0) {
+                opponent.setHealth(opponent.getHealth() - attack);
+                player.setHealth(player.getHealth() - enemyAttack);
+                enemyInfo.setText(opponent.toString());
+                playerInfo.setText(player.toString());
+                updates.setText("Hit!" + "\n" + "Enemy hit you!");
+            } else if (attack == 0 && enemyAttack != 0) {
+                updates.setText("Attack missed!" + "\n" + "Enemy hit you!");
+                player.setHealth(player.getHealth() - enemyAttack);
+                enemyInfo.setText(opponent.toString());
+                playerInfo.setText(player.toString());
+            } else if (attack != 0 && enemyAttack == 0) {
+                opponent.setHealth(opponent.getHealth() - attack);
+                enemyInfo.setText(opponent.toString());
+                updates.setText("Hit!" + "\n" + "Enemy missed!");
+            }
+            if (attack == 0 && enemyAttack == 0) {
+                updates.setText("You both missed!");
+            }
+            attacking = false;
+            enemy1Click = false;
+        }
+        // for magic attack
+        if (casting && enemy1Click) {
+            int enemyAttack = opponent.getDmg();
+            if (player.getMana() < 5) {
+                updates.setText("No mana left, attack with melee!");
+                casting = false;
+            }
+            if (player.getMana() >= 5) {
+                int spell = player.getMagicDmg();
+                player.setMana(player.getMana() - player.getManaCost());
+                if (spell != 0 && enemyAttack != 0) {
+                    opponent.setHealth(opponent.getHealth() - spell);
+                    player.setHealth(player.getHealth() - enemyAttack);
+                    enemyInfo.setText(opponent.toString());
+                    playerInfo.setText(player.toString());
+                    updates.setText("Spell hit!" + "\n" + "Enemy hit you!");
+                } else if (spell == 0 && enemyAttack != 0) {
+                    player.setHealth(player.getHealth() - enemyAttack);
+                    playerInfo.setText(player.toString());
+                    updates.setText("Spell missed!" + "\n" + "Enemy hit you!");
+                } else if (spell != 0 && enemyAttack == 0) {
+                    opponent.setHealth(opponent.getHealth() - spell);
+                    enemyInfo.setText(opponent.toString());
+                    playerInfo.setText(player.toString());
+                    updates.setText("Spell hit!" + "\n" + "Enemy missed!");
+                }
+                if (spell == 0 && enemyAttack == 0) {
+                    playerInfo.setText(player.toString());
+                    updates.setText("You both missed!");
+                }
+                casting = false;
+                enemy1Click = false;
+            }
+        }
+        // enemy death
+        if (opponent.getHealth() <= 0) {
+            enemy.setDisable(true);
+            if (player.getMana() < 9) {
+                player.setMana(player.getMana() + 2);
+            } else {
+                player.setMana(10);
+            }
+            player.setExp(player.getExp() + opponent.getExpWorth());
+            if (player.getExp() >= player.getExpRequired()) {
+                player.levelUp();
+            }
+            player.setGold((player.getGold() + opponent.getGoldValue()));
+            playerInfo.setText(player.toString());
+            updates.setText(opponent.getName() + " is dead!");
+            opponent.setHealth(0);
+            enemyInfo.setText(opponent.toString());
+        }
+    }
+
+    public void deathChecks(Player player, Enemy opponent1, Enemy opponent2, Enemy opponent3,
+            Button enemy1, Button enemy2, Button enemy3, TextArea updates, ArrayList enemyList, TextArea enemy1Info,
+            TextArea enemy2Info, TextArea enemy3Info, Alert alert, ButtonType continueButton, Alert fleeing, TextArea playerInfo,
+            Alert playerDeath) {
+        if (opponent1.getHealth() == 0 && opponent2.getHealth() == 0 && opponent3.getHealth() == 0) {
+            updates.setText(opponent1.getName() + " is dead!" + "\n" + "Round Cleared");
+            Optional<ButtonType> result = alert.showAndWait();
+            if (result.get() == continueButton) {
+                enemy1.setDisable(false);
+                enemy2.setDisable(false);
+                enemy3.setDisable(false);
+                opponent1.createOpponent(enemyList);
+                opponent2.createOpponent(enemyList);
+                opponent3.createOpponent(enemyList);
+                enemy1.setGraphic(new ImageView(opponent1.getImage()));
+                enemy2.setGraphic(new ImageView(opponent2.getImage()));
+                enemy3.setGraphic(new ImageView(opponent3.getImage()));
+                enemy1Info.setText(opponent1.toString());
+                enemy2Info.setText(opponent2.toString());
+                enemy3Info.setText(opponent3.toString());
+            } else {
+                fleeing.setContentText("You escape with your loot!" + "\n" + "You collected " + player.getGold() + " gold!");
+                fleeing.showAndWait();
+                System.exit(0);
+            }
+        }
+        // checks for player death
+        if (player.getHealth() <= 0) {
+            playerInfo.setText(player.toString());
+            playerDeath.showAndWait();
+            System.exit(0);
+        }
     }
 }
